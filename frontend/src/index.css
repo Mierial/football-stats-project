@@ -1,0 +1,63 @@
+:root {
+  --padding-inline: 1.5em;
+  --background-color: #111827;
+  --main-content-bg: #0b0f19;
+  --button-color: #1f2937;
+  --border-color: #1f2937;
+  --border: 1px solid var(--border-color);
+  --title-color: #ffffff;
+  --text-light: #f8fafc;
+  --text-muted: #64748b;
+  --main-text-color: #94a3b8;
+  --input-text-color: #e2e8f0;
+  --brand-purple: #818cf8;
+  --active-color: #f59e0b;
+  --points-color: #fbbf24;
+  --login-btn-bg: rgba(255, 255, 255, 0.05);
+  --login-btn-border: rgba(255, 255, 255, 0.15);
+  --team-logo-shadow: drop-shadow(0 4px 12px rgba(249, 248, 248, 0.1));
+  --country-logo-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] {
+  --background-color: #ffffff;
+  --main-content-bg: #f1f5f9;
+  --button-color: #e2e8f0;
+  --border-color: #cbd5e1;
+  --border: 1px solid var(--border-color);
+  --title-color: #0f172a;
+  --text-light: #0f172a;
+  --text-muted: #475569;
+  --main-text-color: #334155;
+  --input-text-color: #0f172a;
+  --brand-purple: #4f46e5;
+  --active-color: #ea580c;
+  --points-color: #ea580c;
+  --login-btn-bg: rgba(0, 0, 0, 0.05);
+  --login-btn-border: rgba(0, 0, 0, 0.2);
+  --team-logo-shadow: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.7));
+  --country-logo-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+}
+
+.app-grid {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas: 
+    'side-panel header'
+    'side-panel main-content';
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-light);
+}
+
+header { grid-area: header; }
+.side-panel { grid-area: side-panel; }
+.main-content { grid-area: main-content; }
+
+.main-content {
+  background: var(--main-content-bg);
+}
+
+p { display: inline; }

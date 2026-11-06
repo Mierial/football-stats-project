@@ -1,0 +1,80 @@
+.main-content__table{
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.group-header {
+  background: transparent;
+  border-bottom: var(--border);
+  color: var(--main-text-color);
+}
+
+.team-container {
+  color: var(--main-text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.team-container:hover {
+  background-color: var(--login-btn-bg);
+  border-radius: 10px;
+  transition: background-color 0.15s ease;
+}
+
+.team-container__name {
+  color: var(--text-light);
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+}
+
+.team-container__image {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.team-container__info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.group-header__games,
+.group-header__wins,
+.group-header__drawes,
+.group-header__loses,
+.group-header__goals,
+.group-header__goal-difference,
+.group-header__show,
+.group-header__name {
+  color: var(--main-text-color);
+}
+
+.group-header__points, 
+.team-container__points {
+  color: var(--points-color);
+  font-weight: bold;
+}
+
+.group-header__show {
+  background: none;
+  border: none;
+  color: var(--main-text-color);
+}
+
+.group-header__name {
+  display: flex;
+}
+
+.group-header,
+.team-container {
+  max-width: 610px;
+  display: grid;
+  grid-template-columns: 30px 300px repeat(8, 35px);
+  text-align: center;
+  align-items: center;
+  padding-block: 0.625rem;
+  width: 100%;
+  font-size: 1rem;
+}

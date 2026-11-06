@@ -1,0 +1,45 @@
+.team-page__navigation{
+    height: 60px;
+    padding-inline: 25px;
+    display: flex;
+    justify-content: space-between;
+    background-color:  var(--background-color);
+}
+
+.navigation__button{
+    position: relative;
+    height: 100%;
+    background: none;
+    color: var(--text-muted);
+    border: none;
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.125rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all .1s ease;
+}
+
+.navigation__button::after{
+    position: absolute;
+    content: '';
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background-color: var(--text-light);
+    transition: width 0.3s ease;
+}
+
+
+.navigation__button:hover::after {
+    width: 100%;
+}
+
+.navigation__button:hover{
+    color: var(--text-light)
+}
+
+.navigation__button--active{
+    color: var(--text-light);
+    transform: scale(1.1);
+}

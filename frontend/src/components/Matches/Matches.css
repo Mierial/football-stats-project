@@ -1,0 +1,31 @@
+.matches__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.status__btn {
+  padding: 8px 16px;
+  background-color: var(--button-color);
+  color: var(--main-text-color);
+  border: var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status__btn:hover {
+  color: var(--title-color);
+  border-color: var(--brand-purple);
+  background-color: var(--login-btn-bg);
+}
+
+.status__btn.active {
+  background-color: var(--brand-purple);
+  color: var(--title-color);
+  border-color: var(--brand-purple);
+}

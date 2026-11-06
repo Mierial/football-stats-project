@@ -1,0 +1,123 @@
+.player-stats__window {
+    background-color: var(--background-color);
+    border: var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.player_stats__filter-options,
+.player_stats__item {
+    display: grid;
+    grid-template-columns: 40px 60px 1fr 70px 70px;
+    align-items: center;
+    padding: 14px 12px;
+}
+
+.player_stats__filter-options {
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 8px;
+    padding-bottom: 12px;
+}
+
+.filter-options__text {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+
+
+.player_stats__item {
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+.player_stats__item:hover {
+    background-color: var(--button-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.player_stats__item:last-child {
+    border-bottom: none;
+}
+
+.player-stats__position {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 15px;
+}
+.player-stats__image {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.player-stats__info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.player-stats__info .player-stats__image {
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--main-content-bg);
+}
+
+.player-stats__name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--title-color);
+}
+
+.player-stats__goals,
+.player-stats__assists {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--main-text-color);
+    text-align: center;
+}
+
+.filter-options__button {
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    margin: 0 auto; 
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.filter-options__button:hover {
+    color: var(--title-color);
+    background-color: var(--button-color); 
+}
+
+.filter-options__button:active {
+    transform: scale(0.95); 
+}
+.filter-options__button.active {
+    color: var(--title-color);
+    background-color: var(--button-color);
+    border-bottom: 2px solid var(--points-color);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.active{
+    color: var(--active-color);
+}

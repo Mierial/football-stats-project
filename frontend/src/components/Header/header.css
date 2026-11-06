@@ -1,0 +1,99 @@
+.header__container {
+  width: 100%;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 3em;
+  padding-block: 1em;
+  background: var(--background-color);
+  border-bottom: var(--border);
+}
+
+.header__theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--main-text-color);
+  font-size: 1.2rem;
+}
+
+.header__group--actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: max-content;
+  padding-inline: var(--padding-inline);
+}
+
+.header__items--text {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--padding-inline);
+  border-right: 2px solid var(--border-color);
+  gap: 2em;
+}
+
+.header__group--items {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header__bracket {
+  text-decoration: none;
+  color: var(--text-muted);
+  align-self: center;
+}
+
+.header__button--login {
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 600; 
+  letter-spacing: 0.5px;
+  background-color: var(--login-btn-bg); 
+  border: 1px solid var(--login-btn-border); 
+  border-radius: 6px; 
+  cursor: pointer; 
+  transition: all 0.2s ease-in-out; 
+}
+
+.button-icon{
+  color: var(--text-light)
+}
+
+.header__button--login:hover {
+  background-color: var(--button-color);
+}
+
+.header__github {
+  color: var(--brand-purple);
+  transition: 0.3s color ease;
+  font-size: 1.3rem;
+  text-decoration: none;
+}
+
+.header__github:hover {
+  color: var(--active-color);
+}
+
+.header__input {
+  border: 1px solid var(--border-color);
+  background-color: var(--button-color);
+  color: var(--input-text-color);
+  width: 100%;
+  max-width: 540px;
+  height: 4ch;
+  border-radius: 6px;
+  outline: none;
+  padding: 5px 15px;
+}
+
+.header__input::placeholder {
+  color: var(--text-muted);
+}
