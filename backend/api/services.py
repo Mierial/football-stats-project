@@ -4,7 +4,7 @@ from api.models import Team, Country, Tournament, Player, MatchEvent,PlayerStats
 from django.db import transaction
 from api.integrations.api_client import FootballApiClient
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 
 client = FootballApiClient(settings.FOOTBALL_API_KEY)
 leagues = ['CL', 'PL', 'ELC', 'PD', 'SA', 'BL1', 'FL1', 'DED', 'PPL']
@@ -494,4 +494,35 @@ def finish_match_and_update_standings(match_id: int, home_score: int, away_score
         away_team_standings.save()
 
         return True 
+
+def build_team_form(team_id, match):
+    is_home_team = match.home_team_id == team_id
+    goals_for = match.home_goals if is_home_team else match.away_goals
+    goals_against = match.away_goals if is_home_team else match.home_goals
+    if goals_for > goals_against:
+        result = 'W'
+    elif goals_for < goals_against:
+        result = 'L'
+    else:
+        result = 'D'
+    return result   
+
+def get_recent_form_for_teams(team_ids: list[int]):
+    matches = Match.objects.filter(Q(home_team_id__in=team_ids) | Q(away_team_id__in=team_ids), status='FINISHED').order_by('-date')
+
+    matches_map = {id: [] for id in team_ids}
+
+    for match in matches:
+        if len(matches_map[match.home_team_id])<5:
+            matches_map[match.home_team_id].append(match)
+        if len(matches_map[match.away_team_id])<5:
+            matches_map[match.away_team_id].append(match)
+    teams_form_dict = {}
+    
+    for team_id, team_matches in matches_map.items():
+        teams_form_dict[team_id] = [
+            build_team_form(team_id, m) for m in team_matches
+        ]
+
+    return teams_form_dict
 

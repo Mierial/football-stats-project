@@ -12,4 +12,4 @@ class MatchFilter(django_filters.FilterSet):
     def filter_by_team(self, queryset, name, value):
         return queryset.filter(
             Q(home_team__external_id=value) | Q(away_team__external_id=value)
-        ).order_by()
+        )

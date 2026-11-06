@@ -192,14 +192,14 @@ class HomePageAPIView(APIView):
             .order_by('date')
         )
 
-        raw_standings = TeamStats.objects.filter(group__tournament__code__in=top_leagues_code).select_related('team', 'group__tournament').order_by('group__tournament', 'place')
+        raw_standings = TeamStats.objects.filter(group__tournament__code__in=top_leagues_code).select_related('team', 'group__tournament').order_by('place')
 
         grouped_standings = {code: [] for code in top_leagues_code}
-        
+        TOP_N_TEAMS = 6
         for stats in raw_standings:
             league_code = stats.group.tournament.code
 
-            if len(grouped_standings[league_code])<=5: 
+            if len(grouped_standings[league_code]) < TOP_N_TEAMS: 
                 grouped_standings[league_code].append(stats)
 
         yesterday_matches = [m for m in all_matches if m.date.date() == yesterday]
