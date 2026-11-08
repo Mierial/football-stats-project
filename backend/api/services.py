@@ -1,3 +1,4 @@
+from django.db.models.functions import Round
 import requests
 from django.conf import settings
 from api.models import Team, Country, Tournament, Player, MatchEvent,PlayerStats, Match, Group, TeamStats
@@ -532,7 +533,7 @@ def get_tournament_stats(tournament):
     overall = matches.aggregate(
         matches=Count('id'),
         total_goals=Sum(F('home_goals') + F('away_goals'), default=0),
-        avg_goals=round(Avg(F('home_goals') + F('away_goals')),default=0),
+        avg_goals=Round(Avg(F('home_goals') + F('away_goals'), default=0),2     ),
         max_goals_in_match=Max(F('home_goals')+F('away_goals'), default=0), 
         home_wins_count=Count('id', filter=Q(home_goals__gt=F('away_goals'))),
         draws_count = Count('id', filter=Q(home_goals=F('away_goals'))), 

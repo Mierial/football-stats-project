@@ -1,9 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from .models import Match, Tournament, Group, Team, TeamStats, Player, PlayerStats
 from .serializers import MatchSerializer, TournamentSerializer, GroupSerializer, TeamBaseSerializer, TeamStatsSerializer, PlayerSerializer, PlayerStatsSerializer, TeamListSerializer, TeamOverviewSerializer, HomePageSerializer, CompactTeamStandingsSerializer, UserSerializer
-from .services import sync_team_by_id, sync_league_teams
+from .services import get_tournament_stats
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -223,3 +223,8 @@ class HomePageAPIView(APIView):
         
 
 
+
+class TournamentStatisticAPIView(APIView): 
+    def get(self, request, external_id):
+        tournament = get_object_or_404(Tournament, external_id=external_id)
+        return Response(get_tournament_stats(tournament), status=status.HTTP_200_OK)   

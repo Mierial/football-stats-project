@@ -11,6 +11,7 @@ from .views import (
     HomePageAPIView,
     register,
     user_profile,
+    TournamentStatisticAPIView
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView, 
@@ -29,6 +30,7 @@ router.register(r'player_stats', PlayerStatsViewSet, basename='stats')
 
 urlpatterns = [
     path('home/', HomePageAPIView.as_view(), name='home-page'),
+    path('tournaments/<int:external_id>/stats', TournamentStatisticAPIView.as_view(), name='tournament-stats'),
     path('auth/register', register, name='register'),
     path('auth/login', TokenObtainPairView.as_view(), name='token-obtain-pair'),
     path('auth/refresh', TokenRefreshView.as_view(), name='token-refresh'),
