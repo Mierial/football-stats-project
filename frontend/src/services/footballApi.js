@@ -51,3 +51,7 @@ export const getTeamOverview = (teamId) => {
 export const getHomePage = () => {
     return request('/home')
 }
+
+export const getTournamentStats = (tournamentId) => {
+    return request(`/tournaments/${tournamentId}/stats`)
+}
