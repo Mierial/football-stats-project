@@ -4,7 +4,7 @@ from api.models import Team, Country, Tournament, Player, MatchEvent,PlayerStats
 from django.db import transaction
 from api.integrations.api_client import FootballApiClient
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import Q, Sum, Avg, Count, Max, F
 
 client = FootballApiClient(settings.FOOTBALL_API_KEY)
 leagues = ['CL', 'PL', 'ELC', 'PD', 'SA', 'BL1', 'FL1', 'DED', 'PPL']
@@ -526,3 +526,16 @@ def get_recent_form_for_teams(team_ids: list[int]):
 
     return teams_form_dict
 
+def get_tournament_stats(tournament):
+    matches = Match.objects.filter(tournament=tournament, status = 'FINISHED')
+
+    overall = matches.aggregate(
+        matches=Count('id'),
+        total_goals=Sum(F('home_goals') + F('away_goals'), default=0),
+        avg_goals=round(Avg(F('home_goals') + F('away_goals')),default=0),
+        max_goals_in_match=Max(F('home_goals')+F('away_goals'), default=0), 
+        home_wins_count=Count('id', filter=Q(home_goals__gt=F('away_goals'))),
+        draws_count = Count('id', filter=Q(home_goals=F('away_goals'))), 
+        away_wins_count=Count('id', filter=Q(home_goals__lt=F('away_goals')))
+    )
+    return overall
