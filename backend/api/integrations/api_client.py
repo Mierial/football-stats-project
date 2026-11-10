@@ -1,4 +1,9 @@
+import logging
+
 import requests
+
+logger = logging.getLogger(__name__)
+
 
 class FootballApiClient:
     BASE_URL = 'http://api.football-data.org/v4'
@@ -9,20 +14,15 @@ class FootballApiClient:
         }
 
     def _base_request(self, endpoint: str) -> dict | list[dict] | None:
-        try:
-            response = requests.get(
-                url=f'{self.BASE_URL}/{endpoint}', 
-                headers=self.headers, 
-                timeout=5
-                )
+        response = requests.get(
+            url=f'{self.BASE_URL}/{endpoint}', 
+            headers=self.headers, 
+            timeout=5
+            )
+        if not response.ok:
+            logger.warning("Football API %s: status %s", endpoint, response.status_code)
             response.raise_for_status()
-            return response.json()
-        except requests.exceptions.Timeout:
-            print("Час очікування вичерпано (більше 5 секунд)")
-            return None       
-        except requests.exceptions.RequestException as e:
-            print(f'Error while connect to api: {e}')
-            return None
+        return response.json()
 
     def get_team(self, team_id: int) -> dict | None:
         return self._base_request(f"teams/{team_id}")
