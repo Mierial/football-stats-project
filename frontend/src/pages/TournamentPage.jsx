@@ -43,7 +43,11 @@ const TournamentPage = () => {
         }).finally(()=>{
             setIsLoading(false)
         })
-    }, [leagueCode]) 
+    }, [leagueCode])
+    
+    const matchDay = teamStandings?.tournament?.matchday  
+
+
     if (isLoading) return <div>Завантаження таблиці...</div>;
     if (!teamStandings) return <div>Не вдалося завантажити дані.</div>;
 

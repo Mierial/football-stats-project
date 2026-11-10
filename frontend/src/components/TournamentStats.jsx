@@ -10,19 +10,13 @@ const TournamentStats = ({ tournamentId }) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        let isActive = true;
-
         setIsLoading(true);
         setError(null);
 
         getTournamentStats(tournamentId)
-            .then((data) => isActive && setStats(data))
-            .catch(() => isActive && setError("Не вдалося завантажити статистику"))
-            .finally(() => isActive && setIsLoading(false));
-
-        return () => {
-            isActive = false;
-        };
+            .then((data) => setStats(data))
+            .catch(() => setError("Не вдалося завантажити статистику"))
+            .finally(() => setIsLoading(false));
     }, [tournamentId]);
 
     if (isLoading) {
@@ -49,12 +43,6 @@ const TournamentStats = ({ tournamentId }) => {
         { label: "Нічиї", value: stats.draws_count, modifier: "draw" },
         { label: "Гості", value: stats.away_wins_count, modifier: "away" },
     ];
-
-    const topTeams = stats.top_teams_by_goals ?? [];
-    const matchdays = stats.goals_by_matchday ?? [];
-
-    const maxTeamGoals = Math.max(...topTeams.map(({ goals }) => goals), 1);
-    const maxMatchdayGoals = Math.max(...matchdays.map(({ goals }) => goals), 1);
 
     return (
         <section className="tournament-stats">
@@ -89,57 +77,6 @@ const TournamentStats = ({ tournamentId }) => {
                     ))}
                 </ul>
             </div>
-
-            {topTeams.length > 0 && (
-                <div className="tournament-stats__block">
-                    <h3 className="tournament-stats__subtitle">Найрезультативніші команди</h3>
-
-                    <ol className="tournament-stats__teams">
-                        {topTeams.map(({ team, goals }, index) => (
-                            <li key={team} className="tournament-stats__team">
-                                <span className="tournament-stats__team-place">{index + 1}</span>
-                                <span className="tournament-stats__team-name">{team}</span>
-                                <span className="tournament-stats__team-track">
-                                    <span
-                                        className="tournament-stats__team-bar"
-                                        style={{ width: toPercent(goals, maxTeamGoals) }}
-                                    />
-                                </span>
-                                <span className="tournament-stats__team-goals">{goals}</span>
-                            </li>
-                        ))}
-                    </ol>
-                </div>
-            )}
-
-            {matchdays.length > 0 && (
-                <div className="tournament-stats__block">
-                    <h3 className="tournament-stats__subtitle">Голи по турах</h3>
-
-                    <div className="tournament-stats__chart">
-                        {matchdays.map(({ matchday, matches, goals }) => (
-                            <div
-                                key={matchday}
-                                className="tournament-stats__column"
-                                title={
-                                    matches
-                                        ? `Тур ${matchday}: голів ${goals}, матчів ${matches}`
-                                        : `Тур ${matchday}: голів ${goals}`
-                                }
-                            >
-                                <div className="tournament-stats__column-track">
-                                    <span className="tournament-stats__column-value">{goals}</span>
-                                    <span
-                                        className="tournament-stats__column-bar"
-                                        style={{ height: `calc((100% - 18px) * ${goals / maxMatchdayGoals})` }}
-                                    />
-                                </div>
-                                <span className="tournament-stats__column-label">{matchday}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
         </section>
     );
 };
