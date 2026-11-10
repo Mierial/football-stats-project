@@ -31,6 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FOOTBALL_API_KEY = config('FOOTBALL_API_KEY')
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 DB_PASSWORD = config('DB_PASSWORD')
+API_TOURNAMENTS = ['CL', 'PL', 'ELC', 'PD', 'SA', 'BL1', 'FL1', 'DED', 'PPL']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -184,13 +185,13 @@ CELERY_TIMEZONE = 'Europe/Kyiv'
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
-    'download_league_matches-every-10-min': {
+    'download_leagues_data-daily': {
         'task': 'api.tasks.sync_league_matches_task',
-        'schedule': crontab(minute='*/10'),
+        'schedule': crontab(hour=4, minute=0),
     },
     'update_league_stadnings-nightly': {
-            'task': 'api.tasks.sync_all_leagues_team_standings_task',
-            'schedule': crontab(hour=3, minute=0),
+            'task': 'api.tasks.sync_all_leagues_data_task',
+            'schedule': crontab(hour=21, minute=0),
         },
     'update_league_standings': {
         'task': 'api.tasks.sync_all_leagues_team_standings_task',
@@ -199,5 +200,11 @@ CELERY_BEAT_SCHEDULE = {
     'update_leagues_matchday': {
             'task': 'api.tasks.sync_tournaments_info_task',
             'schedule': crontab(hour=21, minute=22) 
-        }
+        },
+    'sync-live-matches-every-minute': {
+            'task': 'api.tasks.sync_live_matches_task',
+            'schedule': crontab(minute='*'),
+
+        },
+
 }
