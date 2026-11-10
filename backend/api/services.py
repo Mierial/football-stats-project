@@ -533,10 +533,34 @@ def get_tournament_stats(tournament):
     overall = matches.aggregate(
         matches=Count('id'),
         total_goals=Sum(F('home_goals') + F('away_goals'), default=0),
-        avg_goals=Round(Avg(F('home_goals') + F('away_goals'), default=0),2     ),
+        avg_goals=Round(Avg(F('home_goals') + F('away_goals'), default=0), 2),
         max_goals_in_match=Max(F('home_goals')+F('away_goals'), default=0), 
         home_wins_count=Count('id', filter=Q(home_goals__gt=F('away_goals'))),
         draws_count = Count('id', filter=Q(home_goals=F('away_goals'))), 
         away_wins_count=Count('id', filter=Q(home_goals__lt=F('away_goals')))
     )
-    return overall
+
+    home_scorers = matches.values('home_team__name').annotate(goals=Sum('home_goals')).order_by('-goals')
+    away_scorers = matches.values('away_team__name').annotate(goals=Sum('away_goals')).order_by('-goals')
+    total_goals = {}
+
+    for team in home_scorers:
+        total_goals[team['home_team__name']] = total_goals.get(team['home_team__name'], 0) + team['goals']
+    for team in away_scorers:
+        total_goals[team['away_team__name']] = total_goals.get(team['away_team__name'], 0 ) + team['goals']
+
+    top_scorers = sorted(total_goals.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_scorers = [{'team': name, 'goals': goals} for name, goals in top_scorers]
+    
+    goals_by_matchday = (
+        matches.values('matchday')
+        .annotate(
+            matches=Count('id'),
+            goals=Sum(F('home_goals')+F('away_goals'))
+            ).order_by('matchday')
+        )
+    return {
+        **overall,
+        'top_teams_by_goals': top_scorers,
+        'goals_by_matchday': list(goals_by_matchday),
+    }
