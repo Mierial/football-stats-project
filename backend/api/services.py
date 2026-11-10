@@ -246,122 +246,103 @@ def sync_match_info_by_id(match_id: int) -> dict | None:
             register_match_event(match_obj, player_obj, 'GOAL', minute)
         return data
 
-
-
-
-def sync_all_matches() -> dict | None:
-    for league in leagues:
-        try:
-            data = client.get_matches(league)
-        except Exception as e:
-            print(f"[Помилка] Збій під час синхронізації {league}: {e}")
-            continue
-        if not data:
-            continue
-
-        try:
-            with transaction.atomic():
-                _sync_league_data(data)
-        except Exception as e:
-            print(f'Database error: {e}')
-        
-    return data
-
-def _sync_league_data(data: dict):
-    tournament_obj, _ = Tournament.objects.get_or_create(
-        external_id = data.get('competition').get('id')
-    )
-
-    teams_to_load_map = {}
-
-    for match_data in data['matches']:
-        for side in ('homeTeam', 'awayTeam'):
-            team_item = match_data[side]
-            teams_to_load_map[team_item['id']] = Team(
-                external_id=team_item['id'],
-                name=team_item['name'],
-                short_name=team_item.get('shortName'),
-                tla=team_item.get('tla'),
-                image=team_item.get('crest'),
-            )
-
-    Team.objects.bulk_create(
-        teams_to_load_map.values(),
-        update_conflicts=True,
-        unique_fields=['external_id'],
-        update_fields=['name', 'short_name', 'tla', 'image']
-    )        
-
-    actual_teams = Team.objects.in_bulk(
-    teams_to_load_map.keys(), 
-    field_name='external_id'
-    )
-
-    matches_to_upsert = []
-
-    raw_groups = {m.get('group') for m in data['matches'] if m.get('group')}
-
-    groups_objects = {}
-
-    for group_name in raw_groups:
-        group_object, _ = Group.objects.get_or_create(
-            group_name=group_name,
-            tournament=tournament_obj,
+def sync_league_data(league):
+    data = client.get_matches(league_code=league)
+    with transaction.atomic():
+        tournament_obj, _ = Tournament.objects.get_or_create(
+            external_id = data.get('competition').get('id')
         )
-        groups_objects[group_name]= group_object
+
+        teams_to_load_map = {}
+
+        for match_data in data['matches']:
+            for side in ('homeTeam', 'awayTeam'):
+                team_item = match_data[side]
+                teams_to_load_map[team_item['id']] = Team(
+                    external_id=team_item['id'],
+                    name=team_item['name'],
+                    short_name=team_item.get('shortName'),
+                    tla=team_item.get('tla'),
+                    image=team_item.get('crest'),
+                )
+
+        Team.objects.bulk_create(
+            teams_to_load_map.values(),
+            update_conflicts=True,
+            unique_fields=['external_id'],
+            update_fields=['name', 'short_name', 'tla', 'image']
+        )        
+
+        actual_teams = Team.objects.in_bulk(
+        teams_to_load_map.keys(), 
+        field_name='external_id'
+        )
+
+        matches_to_upsert = []
+
+        raw_groups = {m.get('group') for m in data['matches'] if m.get('group')}
+
+        groups_objects = {}
+
+        for group_name in raw_groups:
+            group_object, _ = Group.objects.get_or_create(
+                group_name=group_name,
+                tournament=tournament_obj,
+            )
+            groups_objects[group_name]= group_object
 
 
-    default_group, _ = Group.objects.get_or_create(
-        tournament=tournament_obj,
-        group_name=None,
-    )
-
-    for match_data in data['matches']:
-        stage = match_data.get('stage')
-        group_obj = groups_objects.get(match_data.get('group')) or default_group
-        if group_obj == None:
-            group_obj = default_group
-
-        score_data = (match_data.get('score') or {}).get('fullTime') or {}
-
-        home_team_id = int(match_data['homeTeam']['id'])
-        away_team_id = int(match_data['awayTeam']['id'])
-
-
-        matches_to_upsert.append(
-            Match(
-            external_id=match_data.get('id'),
-            home_team=actual_teams[home_team_id],
-            away_team=actual_teams[away_team_id],
-            stage = stage if stage!='REGULAR SEASON' else None,
-            group=group_obj,
+        default_group, _ = Group.objects.get_or_create(
             tournament=tournament_obj,
-            matchday= match_data.get('matchday'),
-            date= match_data['utcDate'],
-            home_goals=score_data.get('home'),
-            away_goals=score_data.get('away'),
-            status=match_data['status'],
-            current_minute=match_data.get('minute'),
-        ))
+            group_name=None,
+        )
 
-    Match.objects.bulk_create(
-        matches_to_upsert,
-        update_conflicts=True, 
-        unique_fields=['external_id'],
-        update_fields=[
-        'home_team',
-        'away_team',
-        'group',
-        'tournament',
-        'stage',
-        'matchday',
-        'date',
-        'home_goals',
-        'away_goals',
-        'status',
-        'current_minute',
-        ]
-    )
+        for match_data in data['matches']:
+            stage = match_data.get('stage')
+            group_obj = groups_objects.get(match_data.get('group')) or default_group
+            if group_obj == None:
+                group_obj = default_group
+
+            score_data = (match_data.get('score') or {}).get('fullTime') or {}
+
+            home_team_id = int(match_data['homeTeam']['id'])
+            away_team_id = int(match_data['awayTeam']['id'])
+
+
+            matches_to_upsert.append(
+                Match(
+                external_id=match_data.get('id'),
+                home_team=actual_teams[home_team_id],
+                away_team=actual_teams[away_team_id],
+                stage = stage if stage!='REGULAR SEASON' else None,
+                group=group_obj,
+                tournament=tournament_obj,
+                matchday= match_data.get('matchday'),
+                date= match_data['utcDate'],
+                home_goals=score_data.get('home'),
+                away_goals=score_data.get('away'),
+                status=match_data['status'],
+                current_minute=match_data.get('minute'),
+            ))
+
+        Match.objects.bulk_create(
+            matches_to_upsert,
+            update_conflicts=True, 
+            unique_fields=['external_id'],
+            update_fields=[
+            'home_team',
+            'away_team',
+            'group',
+            'tournament',
+            'stage',
+            'matchday',
+            'date',
+            'home_goals',
+            'away_goals',
+            'status',
+            'current_minute',
+            ]
+        )
 
 
 
@@ -426,10 +407,6 @@ def sync_team_standings(group__tournament__code: str) -> dict | None:
 
     return {"status": "empty", "updated": 0}
 
-
-def sync_all_leagues_team_standings(leagues):
-    for league in leagues:
-        sync_team_standings(league)
 
 def finish_match_and_update_standings(match_id: int, home_score: int, away_score: int) -> bool:
     with transaction.atomic():
@@ -540,8 +517,8 @@ def get_tournament_stats(tournament):
         away_wins_count=Count('id', filter=Q(home_goals__lt=F('away_goals')))
     )
 
-    home_scorers = matches.values('home_team__name').annotate(goals=Sum('home_goals')).order_by('-goals')
-    away_scorers = matches.values('away_team__name').annotate(goals=Sum('away_goals')).order_by('-goals')
+    home_scorers = matches.values('home_team__name').annotate(goals=Sum('home_goals'))
+    away_scorers = matches.values('away_team__name').annotate(goals=Sum('away_goals'))
     total_goals = {}
 
     for team in home_scorers:
