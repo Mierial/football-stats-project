@@ -56,9 +56,9 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['date']
     ordering = 'date'
     def get_queryset(self):
-        return Match.objects.select_related('home_team', 'away_team', 'tournament').order_by('id')
+        return Match.objects.select_related('home_team', 'away_team', 'tournament').prefetch_related('events').order_by('id')
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self):
         match_id = self.kwargs.get('external_id')
         match_obj = Match.objects.filter(external_id=match_id).select_related('home_team', 'away_team').first()
         if not match_obj and match_id:

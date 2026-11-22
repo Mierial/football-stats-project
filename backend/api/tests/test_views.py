@@ -26,3 +26,13 @@ def test_delete_match_by_anon(client, tournament, home_team, away_team):
     response = client.delete('/matches/1/')
 
     assert response.status_code == 401
+@pytest.mark.django_db
+def test_request_count_in_mathces(client, home_team, away_team, tournament, django_assert_num_queries):
+    create_match(1, tournament, home_team, away_team, 2, 2, matchday=1, status='SCHEDULED')
+    create_match(2, tournament, home_team, away_team, 2, 2, matchday=1, status='SCHEDULED')
+    create_match(3, tournament, home_team, away_team, 2, 2, matchday=1, status='SCHEDULED')
+
+    with django_assert_num_queries(1):
+        response = client.get(f'/matches/')
+    assert response.status_code == 200
+    

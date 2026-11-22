@@ -6,6 +6,7 @@ from django.db import transaction
 from api.integrations.api_client import FootballApiClient
 from django.db import transaction
 from django.db.models import Q, Sum, Avg, Count, Max, F
+from collections import Counter
 
 client = FootballApiClient(settings.FOOTBALL_API_KEY)
 leagues = ['CL', 'PL', 'ELC', 'PD', 'SA', 'BL1', 'FL1', 'DED', 'PPL']
@@ -411,7 +412,7 @@ def sync_team_standings(group__tournament__code: str) -> dict | None:
 def finish_match_and_update_standings(match_id: int, home_score: int, away_score: int) -> bool:
     with transaction.atomic():
         try:
-            match, created = Match.objects.update_or_create(external_id=match_id)
+            match, _ = Match.objects.update_or_create(external_id=match_id)
         except Match.DoesNotExist:
             return None
         
@@ -519,14 +520,13 @@ def get_tournament_stats(tournament):
 
     home_scorers = matches.values('home_team__name').annotate(goals=Sum('home_goals'))
     away_scorers = matches.values('away_team__name').annotate(goals=Sum('away_goals'))
-    total_goals = {}
-
+    goals_by_team = Counter()
     for team in home_scorers:
-        total_goals[team['home_team__name']] = total_goals.get(team['home_team__name'], 0) + team['goals']
+        goals_by_team[team['home_team__name']] += team['goals']
     for team in away_scorers:
-        total_goals[team['away_team__name']] = total_goals.get(team['away_team__name'], 0 ) + team['goals']
+        goals_by_team[team['away_team__name']] += team['goals']
 
-    top_scorers = sorted(total_goals.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_scorers = goals_by_team.most_common(5)
     top_scorers = [{'team': name, 'goals': goals} for name, goals in top_scorers]
     
     goals_by_matchday = (
