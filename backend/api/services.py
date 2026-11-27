@@ -357,14 +357,13 @@ def sync_live_matches() -> list | None:
     existing_matches = list(Match.objects.filter(external_id__in=external_ids))
     matches_dict = {m.external_id: m for m in existing_matches}
     matches_to_update=[]
-
+    league_to_update_standings = set()
     for match_data in data['matches']:
         match_obj = matches_dict.get(match_data['id'])
         if match_obj:
             match_obj.home_goals = match_data['score']['fullTime']['home']
             match_obj.away_goals = match_data['score']['fullTime']['away']
             match_obj.current_minute = match_data.get('minute')
-            league_to_update_standings = set()
             if match_data.get('status') == 'FINISHED' and match_obj.status != 'FINISHED':
                 league_code = match_data['competition'].get('code')
                 league_to_update_standings.add(league_code)
@@ -410,7 +409,7 @@ def sync_team_standings(group__tournament__code: str) -> dict | None:
             ['place', 'games_played', 'wins', 'draws', 'losses', 'points', 'goals_for', 'goals_against', 'goal_difference']
         )
         return {"status": "ok", "updated": len(team_standings_to_update)}
-    cache.delete(f"standings:{group__tournament__code}")
+    cache.delete(sync_team_standings(group__tournament__code))
 
     return {"status": "empty", "updated": 0}
 
@@ -547,3 +546,6 @@ def get_tournament_stats(tournament):
         'top_teams_by_goals': top_scorers,
         'goals_by_matchday': list(goals_by_matchday),
     }
+
+def standings_cache_key(league_code: str) -> str:
+    return f"standings:{league_code}"

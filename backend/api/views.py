@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework import viewsets
 from .models import Match, Tournament, Group, Team, TeamStats, Player, PlayerStats
 from .serializers import MatchSerializer, TournamentSerializer, GroupSerializer, TeamBaseSerializer, TeamStatsSerializer, PlayerSerializer, PlayerStatsSerializer, TeamListSerializer, TeamOverviewSerializer, HomePageSerializer, CompactTeamStandingsSerializer, UserSerializer
-from .services import get_tournament_stats
+from .services import get_tournament_stats, standings_cache_key
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -151,7 +151,7 @@ class TeamStatsViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
                 )
    
-        redis_key = f"standings:{league_code}"
+        redis_key = standings_cache_key(league_code)
         redis_data = cache.get(redis_key)
 
         if redis_data is None:

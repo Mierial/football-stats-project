@@ -25,7 +25,7 @@ class PlayerSerializer(serializers.ModelSerializer):
         )
     team_name = serializers.CharField(source='team.name', read_only=True)
     team_logo = serializers.URLField(source='team.image', read_only=True)
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
+    full_name = serializers.CharField(source='full_name', read_only=True)
     class Meta:
         model = Player
         fields = ['id', 'position', 'position_name', 'full_name', 
