@@ -89,5 +89,8 @@ def sync_live_matches_task():
 
     if not has_live_matches:
         return
-    
-    sync_live_matches()
+
+    finished_leagues = sync_live_matches()
+    for code in finished_leagues:
+        sync_team_standings_task.delay(code)
+

@@ -7,6 +7,7 @@ from api.integrations.api_client import FootballApiClient
 from django.db import transaction
 from django.db.models import Q, Sum, Avg, Count, Max, F
 from collections import Counter
+from django.core.cache import cache
 
 client = FootballApiClient(settings.FOOTBALL_API_KEY)
 leagues = ['CL', 'PL', 'ELC', 'PD', 'SA', 'BL1', 'FL1', 'DED', 'PPL']
@@ -347,7 +348,7 @@ def sync_league_data(league):
 
 
 
-def sync_live_matches() -> dict | None:
+def sync_live_matches() -> list | None:
     data = client.get_live_matches()
     if not data or not data.get('matches'):
         return None
@@ -363,6 +364,10 @@ def sync_live_matches() -> dict | None:
             match_obj.home_goals = match_data['score']['fullTime']['home']
             match_obj.away_goals = match_data['score']['fullTime']['away']
             match_obj.current_minute = match_data.get('minute')
+            league_to_update_standings = set()
+            if match_data.get('status') == 'FINISHED' and match_obj.status != 'FINISHED':
+                league_code = match_data['competition'].get('code')
+                league_to_update_standings.add(league_code)
             match_obj.status = match_data['status']
             matches_to_update.append(match_obj)
 
@@ -371,7 +376,7 @@ def sync_live_matches() -> dict | None:
             matches_to_update, 
             ['home_goals', 'away_goals', 'current_minute', 'status']
         )
-
+    return list(league_to_update_standings)
 
 def sync_team_standings(group__tournament__code: str) -> dict | None:
     data = client.get_team_standings(group__tournament__code)
@@ -405,6 +410,7 @@ def sync_team_standings(group__tournament__code: str) -> dict | None:
             ['place', 'games_played', 'wins', 'draws', 'losses', 'points', 'goals_for', 'goals_against', 'goal_difference']
         )
         return {"status": "ok", "updated": len(team_standings_to_update)}
+    cache.delete(f"standings:{group__tournament__code}")
 
     return {"status": "empty", "updated": 0}
 
