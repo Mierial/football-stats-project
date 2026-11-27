@@ -56,11 +56,11 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['date']
     ordering = 'date'
     def get_queryset(self):
-        return Match.objects.select_related('home_team', 'away_team', 'tournament').prefetch_related('events').order_by('id')
+        return Match.objects.select_related('home_team', 'away_team', 'tournament').prefetch_related('events__player__team').order_by('-date')
 
     def retrieve(self):
         match_id = self.kwargs.get('external_id')
-        match_obj = Match.objects.filter(external_id=match_id).select_related('home_team', 'away_team').first()
+        match_obj = self.get_queryset.filter(external_id=match_id).first()
         if not match_obj and match_id:
             lock_key = f"sync_match_info{match_id}"
             if cache.add(lock_key, True, timeout=60):
@@ -111,8 +111,12 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        team_id = self.kwargs.get(self.lookup_field) 
-
+        team_id = self.kwargs.get(self.lookup_field)
+        if not team_id:
+            return Response(
+                {'detail': 'team id is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         team = self.get_queryset().filter(external_id=team_id).prefetch_related('players').first()
         if team and team.stadium:
             serializer = self.get_serializer(team)
@@ -129,7 +133,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, *args, **kwargs):
         serilaizer = self.get_serializer(self.get_queryset(), many=True)
-        return Response(serilaizer.data)
+        return Response(serilaizer.data, status=status.HTTP_202_ACCEPTED)
 
         
 class TeamStatsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -139,23 +143,32 @@ class TeamStatsViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['group__tournament__code', 'group']
 
-    @method_decorator(cache_page(60*60))
     def list(self, request, *args, **kwargs):
         league_code = request.query_params.get('group__tournament__code')
+        if not league_code:
+            return Response(
+                {'detail': 'group__tournament__code is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+                )
+   
+        redis_key = f"standings:{league_code}"
+        redis_data = cache.get(redis_key)
 
-        stats_queryset = TeamStats.objects.filter(
-            group__tournament__code=league_code
-        ).select_related('team', 'group')
+        if redis_data is None:
+            standings = TeamStats.objects.filter(
+                    group__tournament__code=league_code
+                ).select_related('team')
+            standings_data = TeamStatsSerializer(standings, many=True).data
+            tournament = Tournament.objects.filter(code=league_code).first()
+            tournament_data = TournamentSerializer(tournament).data
+            
+            redis_data = {
+                'tournament': tournament_data,
+                'standings': standings_data
+            }
+            cache.set(redis_key, redis_data, 3600)
 
-        tournament = Tournament.objects.filter(code=league_code).first()
-
-        tournament_data = TournamentSerializer(tournament).data
-        standings_data = TeamStatsSerializer(stats_queryset, many=True).data
-
-        return Response({
-            'tournament': tournament_data,
-            'standings': standings_data
-            })
+        return Response(redis_data)
 
 class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Player.objects.all().select_related('team')
@@ -179,7 +192,7 @@ class PlayerStatsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class HomePageAPIView(APIView):
-    @method_decorator(cache_page(60*5))
+    @method_decorator(cache_page(60))
     def get(self, request):
         today = timezone.now().date()
         yesterday = today - timedelta(days=1)
