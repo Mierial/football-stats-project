@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { getTeamDetails, getTeamMatches } from '../services/footballApi';
 import './TeamPage.css'
 import EntityHeader from '../components/Team/EntityHeader';
-import Matches from '../components/Matches/Matches'
+import TeamMatches from '../components/Matches/TeamMatches';
 import TeamSquad from '../components/Team/TeamSquad'
 import StandingsTable from '../components/StandingsTable/StandingsTable';
 import TeamOverview from '../components/Team/TeamOverview';
 
 const COMPONENT_CHOICES = {
-    'matches': Matches,
+    'matches': TeamMatches,
     'squad': TeamSquad,
     'table': StandingsTable,
     'overview': TeamOverview,
@@ -80,7 +80,7 @@ const TeamPage = () => {
         tabs={TEAM_TABS} 
         tabId={tabId} 
         changeTab={setTabId}/>
-        {!SelectedComponent ? <div>Компонент для вкладки ще у розробці...</div> : <SelectedComponent teamId={teamId} squad={teamData.squad} tournamentCode={teamData.main_league.code} matches={matches}/>}
+        {!SelectedComponent ? <div>Компонент для вкладки ще у розробці...</div> : <SelectedComponent teamId={teamId} squad={teamData.squad} tournamentCode={teamData.main_league.code} matches={matches} />}
         
         </div>
     )
