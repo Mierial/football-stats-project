@@ -34,7 +34,7 @@ export const getMatchById = (matchId) => {
 }
 
 export const getTeamMatches = (teamId) => {
-    return request(`/matches/?team=${teamId}&ordering=date`)
+    return request(`/matches/?team=${teamId}&status=FINISHED`)
 }
 
 export const getPlayersStatsByTeam = (teamId) => {

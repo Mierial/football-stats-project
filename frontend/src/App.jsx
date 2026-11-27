@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage'
 
 import { Route, Routes } from 'react-router-dom'
 import UserProfilePage from './pages/UserProfilePage'
+import Match from './components/Matches/Match'
 
 function App() {
   console.log('app')
@@ -29,6 +30,7 @@ function App() {
             <Route path='team/:teamId' element={<TeamPage />}></Route>
             <Route path='/home' element={<HomePage />}></Route>
             <Route path='/profile/me' element={<UserProfilePage/>}></Route>
+            <Route path='/matches/:matchId' element={<Match/>}></Route>
           </Routes>
         </div>
       </div>
