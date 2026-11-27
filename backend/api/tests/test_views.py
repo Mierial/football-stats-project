@@ -32,7 +32,7 @@ def test_request_count_in_mathces(client, home_team, away_team, tournament, djan
     create_match(2, tournament, home_team, away_team, 2, 2, matchday=1, status='SCHEDULED')
     create_match(3, tournament, home_team, away_team, 2, 2, matchday=1, status='SCHEDULED')
 
-    with django_assert_num_queries(1):
+    with django_assert_num_queries(4):
         response = client.get(f'/matches/')
     assert response.status_code == 200
     

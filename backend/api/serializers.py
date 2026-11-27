@@ -35,15 +35,15 @@ class PlayerSerializer(serializers.ModelSerializer):
 class MatchEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = MatchEvent
-        fields = ['id', 'event', 'player', 'minute']
+        fields = ['id', 'type', 'player', 'minute', 'player_assist']
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['player'] = {
-            'id': instance.player.id,
+            'id': instance.player.external_id,
             'name': instance.player.full_name,
         }
-        representation['team_id'] = instance.team.id
+        representation['team_id'] = instance.player.team.external_id
 
         return representation
 
