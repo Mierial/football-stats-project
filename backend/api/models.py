@@ -183,7 +183,6 @@ class Match(models.Model):
     matchday = models.IntegerField(default=0, null=True, blank=True)
     
     class Meta:
-        ordering = ['date']
         verbose_name = 'Матч'
         
         verbose_name_plural = 'Матчі'
@@ -279,7 +278,7 @@ class Player(models.Model):
         return f"{self.surname if self.surname else self.name} ({self.team.name})"
 
     @property
-    def get_full_name(self):
+    def full_name(self):
         surname = self.surname if self.surname else ''
         return f"{self.name} {surname}"
 
@@ -441,5 +440,6 @@ class MatchEvent(models.Model):
 
     def save(self, *args, **kwargs):
         self.arrange_player_stats_places(tournament=self.match.tournament)
+        super().save(*args, **kwargs)
         
         
